@@ -1,51 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { createTask, updateTask } from '../services/taskService';
+import React, { useState } from 'react';
 
-const TaskForm = ({ taskToEdit, onSave }) => {
-    const [title, setTitle] = useState('');
-    const [dueDate, setDueDate] = useState('');
+const TaskForm = ({ addTask }) => {
+  const [newTask, setNewTask] = useState({
+    title: '',
+    dueDate: '',
+    isComplete: false,
+    description: ''
+  });
 
-    useEffect(() => {
-        if (taskToEdit) {
-            setTitle(taskToEdit.title);
-            setDueDate(taskToEdit.dueDate);
-        }
-    }, [taskToEdit]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await addTask(newTask);
+      setNewTask({
+        title: '',
+        dueDate: '',
+        isComplete: false,
+        description: ''
+      });
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const task = { title, dueDate };
-        if (taskToEdit) {
-            await updateTask(taskToEdit.id, task);
-        } else {
-            await createTask(task);
-        }
-        setTitle('');
-        setDueDate('');
-        onSave();
-    };
-
-    return (
-        <div>
-            <h2>{taskToEdit ? 'Edit Task' : 'Add Task'}</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
-                <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    required
-                />
-                <button type="submit">{taskToEdit ? 'Update' : 'Add'}</button>
-            </form>
-        </div>
-    );
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Task Title"
+        value={newTask.title}
+        onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+      />
+      <input
+        type="date"
+        value={newTask.dueDate}
+        onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+      />
+      <button type="submit">Add Task</button>
+    </form>
+  );
 };
 
 export default TaskForm;
